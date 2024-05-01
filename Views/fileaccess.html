@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIT PASTE | EASY ACCESS</title>
+
+</head>
+
+<body style="background-color: black;">
+    <h1 style="text-align: center; color: rgb(24, 255, 24);">GIT PASTE EASY ACCESS</h1>
+    <p id="timer"
+        style="color: rgb(24, 255, 24); text-align: right;font-size: 25px; border: 2px solid rgb(24, 255, 24);width: fit-content;padding: 5px 15px;float: right;margin-right: 20px;">
+    </p>
+    <p style="color: rgb(24, 255, 24);font-size: 18px;"> <b>&#9675; Note Once the timer is set to 0 your link will be expired <br> <br>&#9675; If you have clicked on the downlo button then also link will be expired</b></p>
+    <div style="width: 100%;display: flex;justify-content: center;align-items: center;">
+        <button id="downloadFile"
+            style="border: 2px solid rgb(24, 255, 24); background-color: transparent; color:  rgb(24, 255, 24); padding: 5px 15px;cursor: pointer;font-size: 25px;"
+            onclick="getFile()">Download File</button>
+    </div>
+    <script>
+        const urlString = document.URL;
+        const url = new URL(urlString);
+        const params = new URLSearchParams(url.search);
+        const name = params.get('name');
+        const folder = params.get('folder');
+        const id = params.get('id');
+        const token = params.get('token');
+        const duration = params.get('duration');
+
+        let timerInterval ;    
+        function startTimer(minutes) {  
+            if(minutes==0){
+                clearInterval(timerInterval);
+                const timerDiv = document.querySelectorAll("#timer")[0];
+                timerDiv.innerHTML="00:00"
+                return;
+            }     
+            let seconds = minutes * 60;
+            const timerDiv = document.getElementById("timer");
+            timerDiv.textContent = formatTime(seconds);
+            timerInterval = setInterval(() => {
+                seconds--;
+                timerDiv.textContent = formatTime(seconds);
+                if (seconds <= 0) {                    
+                    clearInterval(timerInterval);
+                    timerDiv.textContent = "Timer has ended!";
+                }
+            }, 1000);          
+        }
+
+        const checkTime = (min, sec) => {
+            if (+min <= 0 && +sec <= 0) {
+                const downloadBtn = document.querySelectorAll("#downloadFile")[0];
+                if (downloadBtn) {
+                    downloadBtn.remove()
+                }
+            }
+        }
+
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            const formattedMins = mins < 10 ? "0" + mins : mins;
+            const formattedSecs = secs < 10 ? "0" + secs : secs;
+            checkTime(formattedMins, formattedSecs)
+            return `${formattedMins}:${formattedSecs}`;
+        }
+        startTimer(duration);
+
+        const getFile = async () => {
+            const payload = {
+                userName: name,
+                folderName: folder,
+                fileId: id,
+                duration: parseInt(duration),
+                linkKey: token,
+                type: 'ff'
+            }
+            const response = await fetch("http://localhost:5000/access-file", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            }).then(response => response.json())
+                .then((data) => {
+                    const blob = new Blob([data.fileData]);
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = data.fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(link);
+                    const downloadBtn = document.querySelectorAll("#downloadFile")[0];
+                    downloadBtn.remove();
+                    startTimer(0)
+                }).catch((err) => {
+                    console.log(err.message)
+                })
+        }
+    </script>
+</body>
+
+</html>

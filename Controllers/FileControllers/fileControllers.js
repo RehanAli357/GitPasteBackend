@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
+const path = require('path');
 const FileFolder = require('../../Cluster/Schema/allDataSchema');
-
 const uploadFile = async (req, res) => {
     try {
         const errors = validationResult(req);
@@ -281,7 +281,7 @@ const shareFile = async (req, res) => {
                         data.folders[folderIndex].files[fileIndex].fileKey = encodedString
                         data.folders[folderIndex].files[fileIndex].fileDuration = req.body.duration
                         await data.save().then(() => {
-                            if(req.body.type!=="ff"){
+                            if (req.body.type !== "ff") {
                                 return res.status(200).json({ message: "Link Created", status: true, linkKey: encodedString, duration: req.body.duration })
                             }
                         }).catch((error) => res.status(400).json({ message: error.message, status: false }))
@@ -342,4 +342,19 @@ const accessFile = async (req, res) => {
         });
     }
 }
-module.exports = { uploadFile, createFolder, getFileFolder, deleteFolder, deleteFile, updateFile, updateFolder, downloadFile, shareFile, accessFile }
+
+
+
+const easyaccess = async (req, res) => {
+    const { name, folder, id, token, duration } = req.query;
+
+    if (!name || !folder || !id || !token || !duration) {
+        return res.status(400).json({ error: 'Missing parameters' });
+    }
+
+    const filePath = path.join(__dirname, '..','..', 'Views', 'fileaccess.html');
+
+    return res.sendFile(filePath);
+}
+
+module.exports = { uploadFile, createFolder, getFileFolder, deleteFolder, deleteFile, updateFile, updateFolder, downloadFile, shareFile, accessFile, easyaccess }

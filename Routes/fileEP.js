@@ -3,7 +3,7 @@ const { body,validationResult } = require('express-validator');
 const router = express.Router();
 const authenticateToken = require('../Middleware/authMiddleware.js');
 const multer = require('multer');
-const { uploadFile, createFolder, getFileFolder, deleteFolder, deleteFile, updateFile, updateFolder, downloadFile, shareFile, accessFile } = require('../Controllers/FileControllers/fileControllers.js');
+const { uploadFile, createFolder, getFileFolder, deleteFolder, deleteFile, updateFile, updateFolder, downloadFile, shareFile, accessFile, easyaccess } = require('../Controllers/FileControllers/fileControllers.js');
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -38,5 +38,6 @@ router.post('/file-share', [authenticateToken, validationRules[0], validationRul
 
 router.post('/access-file', [validationRules[0], validationRules[2], validationRules[3]], accessFile);
 
+router.get('/easyaccess',[validationRules[0],validationRules[3],validationRules[4]],easyaccess)
 
 module.exports = router;
