@@ -2,7 +2,7 @@ const { validationResult } = require('express-validator');
 const UserDetails = require("../../Cluster/Schema/userSchema");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
+const { createUserInstance } = require('../FileControllers/fileControllers')
 const signupUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -18,7 +18,12 @@ const signupUser = async (req, res) => {
             left: 50
         });
         if (data) {
-            return res.status(200).json({ message: "User created successfully", status: true });
+        //remove the createinstance to rewart
+            createUserInstance(req, res).then(() => {
+                return res.status(200).json({ message: "User created successfully", status: true });
+            }).catch((error)=>{
+                return res.status(500).json({message:"Error in Creating User",status:false})
+            })
         } else {
             return res.status(403).json({ message: "USer already exists", status: false });
         }

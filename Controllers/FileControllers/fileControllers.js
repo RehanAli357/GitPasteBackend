@@ -1,6 +1,34 @@
 const { validationResult } = require('express-validator');
 const path = require('path');
 const FileFolder = require('../../Cluster/Schema/allDataSchema');
+
+//start here
+const createUserInstance = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array(), status: false });
+        } else {
+            let data = await FileFolder.findOne({ userName: userName });
+            if (!data) {
+                const newFileFolder = new FileFolder({
+                    userName: req.body.userName,
+                    folders: []
+                });
+
+                await newFileFolder.save();
+            } else { }
+        }
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            status: false,
+            error: error.message || "An error occurred during file processing",
+        });
+    }
+}
+//end here
+
 const uploadFile = async (req, res) => {
     try {
         const errors = validationResult(req);
@@ -352,9 +380,9 @@ const easyaccess = async (req, res) => {
         return res.status(400).json({ error: 'Missing parameters' });
     }
 
-    const filePath = path.join(__dirname, '..','..', 'Views', 'fileaccess.html');
+    const filePath = path.join(__dirname, '..', '..', 'Views', 'fileaccess.html');
 
     return res.sendFile(filePath);
 }
 
-module.exports = { uploadFile, createFolder, getFileFolder, deleteFolder, deleteFile, updateFile, updateFolder, downloadFile, shareFile, accessFile, easyaccess }
+module.exports = { uploadFile, createFolder, getFileFolder, deleteFolder, deleteFile, updateFile, updateFolder, downloadFile, shareFile, accessFile, easyaccess, createUserInstance }

@@ -1,9 +1,9 @@
 const express = require('express');
-const { body,validationResult } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 const router = express.Router();
 const authenticateToken = require('../Middleware/authMiddleware.js');
 const multer = require('multer');
-const { uploadFile, createFolder, getFileFolder, deleteFolder, deleteFile, updateFile, updateFolder, downloadFile, shareFile, accessFile, easyaccess } = require('../Controllers/FileControllers/fileControllers.js');
+const { uploadFile, createFolder, getFileFolder, deleteFolder, deleteFile, updateFile, updateFolder, downloadFile, shareFile, accessFile, easyaccess, createUserInstance } = require('../Controllers/FileControllers/fileControllers.js');
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -17,6 +17,9 @@ const validationRules = [
     body('fileId').isLength({ min: 4 }).withMessage('FileId is not valid'),
     body('duration').isInt({ min: 5, max: 1440 }).withMessage('Duration must be between 5 to 1440 minutes')
 ];
+
+//here
+router.post('/user-instance', [authenticateToken, validationRules[0]], createUserInstance);
 
 router.post('/upload-file', [authenticateToken, upload.single('file'), validationRules[0], validationRules[1], validationRules[2]], uploadFile);
 
@@ -38,6 +41,6 @@ router.post('/file-share', [authenticateToken, validationRules[0], validationRul
 
 router.post('/access-file', [validationRules[0], validationRules[2], validationRules[3]], accessFile);
 
-router.get('/easyaccess',[validationRules[0],validationRules[3],validationRules[4]],easyaccess)
+router.get('/easyaccess', [validationRules[0], validationRules[3], validationRules[4]], easyaccess)
 
 module.exports = router;
